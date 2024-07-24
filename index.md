@@ -1,7 +1,7 @@
 # Operator Control of Rubin Observatory NVR Camera Infrared Illuminators
 
 ```{abstract}
-A solution is proposed to provide web dashboard control of the infrared illuminators on the UniFi web cameras deployed throughout the observatory, with needing to provide and admin-level UniFi account for each operator.
+A solution is proposed to provide web dashboard control of the infrared illuminators on the UniFi web cameras deployed throughout the observatory, without needing to provide and admin-level UniFi account for each operator.
 ```
 
 ## Add content here
