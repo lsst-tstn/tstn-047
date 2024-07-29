@@ -5,7 +5,9 @@
 
 ## TSTN-047
 
-A solution is proposed to provide web dashboard control of the infrared illuminators on the UniFi web cameras deployed throughout the observatory, with needing to provide and admin-level UniFi account for each operator.
+Proposed solution to provide web dashboard control of the infrared illuminators on the UniFi web cameras
+deployed throughout the observatory, without needing to provide and admin-level UniFi account for each
+operator.
 
 **Links:**
 
