@@ -63,15 +63,15 @@ perspective.  Should we wish to do this, the following would still need to be do
 prototype and an operable deployment:
 
 * If desired, integrate with Keycloak authentication for finer-grained access control.  This would obviate
-  need for a shared Home Assistant "operator" account and password.  This is feasible, but perhaps not an
-  issue since the dashboard is limited to illuminators only? <br><br>
+  need for a shared Home Assistant "operator" account and password.  This is feasible, but perhaps not
+  required since the dashboard is limited to illuminators only? <br><br>
 
 * Decide which organization within the observatory would adopt and maintain the deployment.  This would
-  seemingly be either Telescope and Site, or IT.  The deployment described here has no direct integration with
-  the observatory control systems, and interacts only with IT owned/administrated systems. <br><br>
+  seemingly be either Telescope and Site, or IT.  As a point of note, the deployment as described here has no
+  direct integration with the observatory control systems, and interacts only with IT owned/administrated
+  systems. <br><br>
 
-
-* "Devops-ify" the deployment.  This would mean wrapping up the existing prototype deployment
-   yamls in either Rancher Fleet (if adopted by IT) or Phalanx (if adopted by Telescope and Site). <br><br>
+* "Devops-ify" the deployment.  This would mean wrapping up the existing prototype deployment yamls in either
+   Rancher Fleet (if to be adopted by IT) or Phalanx (if to be adopted by Telescope and Site). <br><br>
 
 * Arrange for backup of the persistent volume on which the Home Assistant configuration is stored. <br><br>
