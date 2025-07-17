@@ -48,7 +48,7 @@ volume and used going forward.
 Initial setup is as follows:
 
 * Use the on-boarding wizard to create an ``admin`` account, using the password escrowed in [LSST IT
-  1password](lsstit.1password.com).
+  1password](https://lsstit.1password.com).
 
 * Add the Unifi Protect integration, and configure it with the shared service account credentials also in
   1password.  All attached cameras are then automatically detected.
