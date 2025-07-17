@@ -1,7 +1,7 @@
 # Operator Control of Rubin Observatory NVR Camera Infrared Illuminators
 
 ```{abstract}
-Proposed solution to provide web dashboard control of the infrared illuminators on the UniFi web cameras
+Interim solution to provide web dashboard control of the infrared illuminators on the UniFi web cameras
 deployed throughout the observatory, without needing to provide and admin-level UniFi account for each
 operator.
 ```
@@ -11,67 +11,155 @@ operator.
 Operators at the observatory occasionally need to control the illuminators on the UniFi web cameras deployed
 throughout the observatory.  This has been problematic, since such control via the stock UniFi web interface
 requires a UniFi account with administrator-level privileges and the system supports only a limited number of
-such accounts. Broad distribution of a shared admin-level account with full control over the UniFi system to
-the entire operator staff has been viewed as a non-starter from a security perspective.
+such accounts.
 
-A survey of available Python libraries which might be used to control the illuminators via UniFi-provided web
-APIs was conducted.  Unfortunately, a compelling option was not immediately apparent; the UniFi APIs
-themselves are rather poorly documented, and the off-the-shelf client libraries currently available are the
-usual assortment of abandonware, partially implemented, or outdated solutions.
+There is, however, fairly complete and up-to-date support for UniFi NVR camera systems within the [Home
+Assistant](https://home-assistant.io) home automation platform, which also provides a tailorable web control
+UI, configuartion support, and authentication plugins.
 
-In the course of the survey, however, it was discovered that there is a fairly complete and up-to-date support
-for UniFi NVR camera systems within the [Home Assistant](https://home-assistant.io) home automation platform.
-Home Assistant is a popular and vigorous open-source project with hundreds-of-thousands of installations
-world-wide.  In addition to providing an up to date, maintained, and complete interface to the UniFi camera
-systems, the Home Assistant platform itself provides a tailorable web control UI, configuartion support,
-authentication plugins, etc. all directly out of the box.  Home Assistant is also distributed as a pre-built
-container that can be directly utilized on the observator Kubernetes clusters. It was decided to evaluate the
-use of Home Asisstant and its [in-built UniFi
-support](https://www.home-assistant.io/integrations/unifiprotect/) as a potential low-effort near-term
-solution.
+A Phalanx chart wrapping the official Home Assistant release container has been developed and deployed the
+base test stand and summit, which provides simplified control of the camera illuminators for anyone on the
+summit with valid KeyCloak credentials using a single administrative UniFi service account on the back end.
 
-## Prototype
 
-IT provided the following for the purposes of prototyping:
+## Use and Operation
 
-* Access to the kueyen dev cluster
-* A DNS CNAME (`test-nvr.dev.lsst.org`) for the ingres controller
-* A dedicated, local service account on the NVR appliance
-
-A simple Kubernetes deployment using the latest official Home Assistant release container was hand-coded and
-manually deployed with `kubectl`:
-
-```{figure} kubernetes.svg
-Prototype Kubernetes Deployment
-```
-
-Home Assistant was then configured via its built-in UI.  Once pointed at the NVR appliance and auth'd, all
-on-site UniFi cameras were automatically introspected and made available in the interface.
-
-A dedicated "kiosk mode" page which exposes illuminator controls only was built, using a kiosk plug-in
-available in the Home Assistant community store.  This was set as the default view for a shared "operators"
-local Home Assistant account, and we had a fully operable system up and running:
+The NVR application can be reached on the summit network or summit VPN at <https://nvr.summit-lsp.lsst.codes>.
+After authenticating with summit KeyCloak, users are redirected to a single page interface with a pull-down
+menu for each known UniFi camera:
 
 ```{figure} interface.png
-Prototype illuminator control page
+Illuminator control page
 ```
+
+Supported illuminator modes for each camera are available on the individual menus.  Menu selections take
+effect immediately.  Cameras which are currently completely offline are indicated as greyed out.
+
+
+## Technical Details
+
+The relevant phalanx chart is maintained at
+<https://github.com/lsst-sqre/phalanx/tree/main/applications/nvr-control>.
+
+After a first-time deployment, a Kubernetes port-forward is used to access Home Assistant on its default port
+to perform one-time setup. The resulting configuration is stored automatically on an attached persistent
+volume and used going forward.
+
+Initial setup is as follows:
+
+* Use the on-boarding wizard to create an ``admin`` account, using the password escrowed in [LSST IT
+  1password](lsstid.1password.com).
+
+* Add the Unifi Protect integration, and configure it with the shared service account credentials also in
+  1password.  All attached cameras are then automatically detected.
+
+* Edit the default "Overview" dashboard to be a single page displaying NVR illuminator controls.  This
+  can be done incrementally in the dashboard editor, or pick "Raw configuration editor" from the dots menu
+  at the upper right in the editor and paste in the following yaml for example to do it all in one go:
+  ```yaml
+  views:
+    - path: default_view
+      title: NVR Camera IR Modes
+      cards:
+        - type: entities
+          entities:
+            - entity: select.aux_cam01_infrared_mode
+            - entity: select.aux_cam02_infrared_mode
+            - entity: select.aux_cam03_infrared_mode
+            - entity: select.aux_cam05_infrared_mode
+            - entity: select.besalco_cam01_infrared_mode
+            - entity: select.comcam_cam01_infrared_mode
+            - entity: select.dimm_cam01_infrared_mode
+            - entity: select.dimm_cam02_infrared_mode
+            - entity: select.dome_cam01_infrared_mode
+            - entity: select.dome01_ptz_infrared_mode
+            - entity: select.eie_cam01_infrared_mode
+            - entity: select.gen_cam00_infrared_mode
+            - entity: select.gen_cam01_infrared_mode
+        - type: entities
+          entities:
+            - entity: select.highbay_cam01_infrared_mode
+            - entity: select.highbay_cam02_infrared_mode
+            - entity: select.highbay_cam03_infrared_mode
+            - entity: select.highbay_cam04_infrared_mode
+            - entity: select.highbay_cam06_infrared_mode
+            - entity: select.m1m3_cam01_infrared_mode
+            - entity: select.main7_cam01_infrared_mode
+            - entity: select.main7_cam02_infrared_mode
+            - entity: select.main7_cam03_infrared_mode
+            - entity: select.main7_cam04_infrared_mode
+            - entity: select.penon_cam01_infrared_mode
+            - entity: select.penon01_ptz_infrared_mode
+            - entity: select.pflow_cam01_infrared_mode
+        - type: entities
+          entities:
+            - entity: select.pflow_cam02_infrared_mode
+            - entity: select.pier5_cam01_infrared_mode
+            - entity: select.pier5_dynalene_cam01_infrared_mode
+            - entity: select.pier5_dynalene_cam02_infrared_mode
+            - entity: select.pier6_cam01_infrared_mode
+            - entity: select.pier7_cam01_infrared_mode
+            - entity: select.pier7_cam02_infrared_mode
+            - entity: select.pier7_cam03_infrared_mode
+            - entity: select.pier7_refrig_cam01_infrared_mode
+            - entity: select.sdc_cam01_infrared_mode
+            - entity: select.sdc_cam02_infrared_mode
+            - entity: select.sdc_cam03_infrared_mode
+            - entity: select.shutter_motor01_infrared_mode
+      type: masonry
+      icon: mdi:webcam
+  ```
+
+* Download and install the Home Assistant Community Store integration ("HACS"), per directions at
+  <https://www.hacs.xyz/docs/use/>.
+
+* Install the "Kiosk Mode" extension in HACS.  Configure kiosk mode for the "Overview" dashboard by returning
+  to the "Raw configuration editor" and pasting in the following yaml at the top above the ``views:`` section:
+  ```yaml
+  kiosk_mode:
+    hide_sidebar: true
+    hide_menubutton: true
+    hide_search: true
+    hide_assistant: true
+  ```
+  > [!Note]
+  > To temporarily restore the sidebar and menus after activating kiosk mode, append ``?disable_km`` in the
+  > browser URL bar.
+
+* Create a new non-administrator ``operator`` user in the "People" configuration section, using the password
+  escrowed in 1password. This will be the single shared Home Assistant user downstream of KeyCloak
+  authorization.
+
+* Install the "Header Authentication" extension in HACS.  This will enable Home Assistant to auth via
+  a header passed from upstream gafaelfawr after keycloak auth.
+
+* Get a shell in the Home Assistant pod via Kubernetes, and enable authenticated external access by adding
+  the following sections to ``/config/config.yaml``, immediately before the ``!include`` sections at the end:
+  ```yaml
+  http:
+    use_x_forwarded_for: true
+    trusted_proxies:
+      - 10.0.0.0/8
+      - 172.16.0.0/12
+      - 192.168.0.0/16
+
+  auth_header:
+    username_header: X-Rubin-NVR-Proxied-User
+  ```
+
+* Return to the Home Assistant web UI on the Kubernetes port forward and reload the edited configuration via
+  the "Developer tools" view.  The application should now be accessible without port forward via its "front
+  door" at <https://nvr.summit-lsp.lsst.codes>.
+
 
 ## To Do
 
-Use of Home Assistant for this purpose in the near term seems completely feasible from a technical
-perspective.  Should we wish to do this, the following would still need to be done to close the gap between a
-prototype and an operable deployment:
+* Arrange for backup of the persistent volume on which the Home Assistant configuration is stored.
 
-* If desired, integrate with Keycloak authentication for finer-grained access control.  This would obviate
-  need for a shared Home Assistant "operator" account and password.  This is feasible, but perhaps not
-  required since the dashboard is limited to illuminators only? <br><br>
+* Consider obtaining a surplus UniFi NVR for integration into the BTS.  Right now, the BTS deployment accesses
+  the NVR appliance at the summit.
 
-* Decide which organization within the observatory would adopt and maintain the deployment.  This would
-  seemingly be either Telescope and Site, or IT.  As a point of note, the deployment as described here has no
-  direct integration with the observatory control systems, and interacts only with IT owned/administrated
-  systems. <br><br>
+* Integrate PDU control for full power-cuts to a subset of cameras in the dome once the (currently misplaced)
+  PDU hardware is located.
 
-* "Devops-ify" the deployment.  This would mean wrapping up the existing prototype deployment yamls in either
-   Rancher Fleet (if to be adopted by IT) or Phalanx (if to be adopted by Telescope and Site). <br><br>
-
-* Arrange for backup of the persistent volume on which the Home Assistant configuration is stored. <br><br>
+<br><br>
