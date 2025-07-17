@@ -17,10 +17,11 @@ There is, however, fairly complete and up-to-date support for UniFi NVR camera s
 Assistant](https://home-assistant.io) home automation platform, which also provides a tailorable web UI and
 authentication plugins.
 
-A Phalanx chart wrapping the official Home Assistant release container has been developed and deployed the
+A Phalanx chart wrapping the official Home Assistant release container has been developed and deployed at the
 base test stand and summit, which provides simplified control of the camera illuminators for anyone on the
-summit network with valid KeyCloak credentials.  All accesses through the platform use a single backend
-UniFi service account, the credentials for which need not be shared.
+summit network with valid KeyCloak credentials.  All accesses through the platform use a single backend UniFi
+service account, the credentials for which need not be shared.
+
 
 ## Use and Operation
 
@@ -43,7 +44,7 @@ The relevant phalanx chart is maintained at
 
 After a first-time deployment, a Kubernetes port-forward is used to access Home Assistant on its default port
 in order to perform one-time setup. The resulting configuration is stored automatically on an attached
-persistent volume and used going forward.
+persistent volume and used from that point forward.
 
 Initial setup is as follows:
 
@@ -127,19 +128,20 @@ Initial setup is as follows:
   ```
 
   ```{note}
-  To temporarily restore the sidebar and menus after activating kiosk mode, append ``?disable_km`` in the
-  browser URL bar.
+  To temporarily restore the sidebar and menus at any point after activating kiosk mode, append
+  ``?disable_km`` in the browser URL bar.
   ```
 
 * Create a new non-administrator ``operator`` user in the "People" configuration section, using the password
-  escrowed in 1password. This will be the single shared Home Assistant user downstream of KeyCloak
-  authorization.
+  escrowed in 1password. This will be the single shared Home Assistant user used downstream of KeyCloak
+  authentication.
 
 * Install the "Header Authentication" extension in HACS.  This will enable Home Assistant to auth as
-  ``operator`` automatically via a header passed from upstream gafaelfawr post-keycloak.
+  ``operator`` automatically via a header passed from upstream after KeyCloak authentication.
 
-* Get a shell in the Home Assistant pod via Kubernetes, and enable authenticated external access by adding
-  the following sections to ``/config/config.yaml``, immediately before the ``!include`` sections at the end:
+* Get a shell in the Home Assistant pod via Kubernetes, and enable authenticated external access by adding the
+  following sections to ``/config/configuration.yaml``, immediately before the ``!include`` sections at the
+  end:
 
   ```yaml
   http:
@@ -153,14 +155,12 @@ Initial setup is as follows:
     username_header: X-Rubin-NVR-Proxied-User
   ```
 
-* Return to the Home Assistant web UI on the Kubernetes port forward and reload the edited configuration via
-  the "Developer tools" view.  The application should now be accessible without port forward via its auth'd
-  "front door" at <https://nvr.summit-lsp.lsst.codes>.
+* Return to the Home Assistant web UI and reload the edited configuration via the "Developer tools" view.  The
+  application should now be accessible without port forward via its auth'd "front door" at
+  <https://nvr.summit-lsp.lsst.codes>.
 
 
 ## To Do
-
-* Arrange for backup of the persistent volume on which the Home Assistant configuration is stored.
 
 * Consider obtaining a surplus UniFi NVR for integration into the BTS.  Right now, the BTS deployment accesses
   the NVR appliance at the summit.
